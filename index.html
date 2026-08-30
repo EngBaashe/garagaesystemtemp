@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garage System</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1 id="brandName">AUTO EXPERT &amp; GENUINE PARTS</h1>
+      <span class="tagline">Diagnostic • Service • Major Repairs • Car Wash • Genuine Parts • Tires • A/C</span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-sheet="master">MASTER</button>
+      <button class="tab" data-sheet="parts">PARTS</button>
+      <button class="tab" data-sheet="cash">CASH</button>
+      <button class="tab" data-sheet="close">CLOSE</button>
+      <button class="tab" data-sheet="settings">SETTINGS</button>
+      <button class="tab" data-sheet="print">PRINT</button>
+    </nav>
+  </header>
+
+  <main id="sheets">
+
+    <!-- ======================= MASTER ======================= -->
+    <section class="sheet active" id="sheet-master">
+      <div class="card form-card">
+        <h2 class="form-title">Job Card / Performa</h2>
+        <div class="form-grid" id="masterForm">
+          <label>JC.NO <input id="fJc" /></label>
+          <label>Status
+            <select id="fStatus">
+              <option>Diagnosis</option>
+              <option>Waiting Approval</option>
+              <option>Waiting Parts</option>
+              <option>Being Repaired</option>
+              <option>Completed</option>
+            </select>
+          </label>
+          <label>Date <input id="fDate" type="date" /></label>
+          <label>Approval Date <input id="fApproval" type="date" /></label>
+          <label>Customer Name <input id="fCustomer" /></label>
+          <label>Company/Office <input id="fCompany" /></label>
+          <label>Telephone <input id="fPhone" /></label>
+          <label>Number Plate <input id="fPlate" /></label>
+          <label>VIN/Model <input id="fVin" /></label>
+          <label>Odometer (Km) <input id="fOdometer" type="number" /></label>
+          <label class="span2">Assigned Mechanic <input id="fMechanic" /></label>
+          <label>Service Type <select id="fService"></select></label>
+          <label>Labor Cost <input id="fLabor" type="number" step="0.01" /></label>
+          <label class="span2">Mechanic's Report <input id="fReport" /></label>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" id="btnAdd">ADD NEW JOB</button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <table id="masterTable">
+          <thead>
+            <tr>
+              <th>JC.NO</th><th>Date</th><th>Customer</th><th>Company</th><th>Phone</th>
+              <th>Plate</th><th>VIN</th><th>Odometer</th><th>Service</th><th>Status</th>
+              <th>Approval</th><th>Mechanic</th><th>Labor</th><th>Total Parts</th>
+              <th>VAT 15%</th><th>Grand Total</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="masterBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================= PARTS ======================= -->
+    <section class="sheet" id="sheet-parts">
+      <div class="card toolbar">
+        <label>JC.NO <select id="partsJc"></select></label>
+        <label>Part Name <input id="pName" /></label>
+        <label>QTY <input id="pQty" type="number" value="1" min="1" /></label>
+        <label>Unit Price <input id="pPrice" type="number" step="0.01" /></label>
+        <label>Source
+          <select id="pSource"><option>Internal</option><option>External</option></select>
+        </label>
+        <label>Version <input id="pVersion" type="number" value="1" min="1" /></label>
+        <button class="btn primary" id="btnAddPart">ADD PART</button>
+      </div>
+      <div class="card table-card">
+        <table id="partsTable">
+          <thead><tr><th>JC.NO</th><th>Part Name</th><th>QTY</th><th>Unit Price</th><th>Source</th><th>Version</th><th>TOTAL</th><th></th></tr></thead>
+          <tbody id="partsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================= CASH ======================= -->
+    <section class="sheet" id="sheet-cash">
+      <div class="card toolbar">
+        <label>Shift
+          <select id="cShift"><option>Shift 1</option><option>Shift 2</option></select>
+        </label>
+        <label>Employee <input id="cEmployee" /></label>
+        <label>Type
+          <select id="cType"><option>Cash In</option><option>Cash Out</option></select>
+        </label>
+        <label>Amount <input id="cAmount" type="number" step="0.01" /></label>
+        <label>Description <input id="cDesc" /></label>
+        <label>Date <input id="cDate" type="date" /></label>
+        <button class="btn primary" id="btnAddCash">ADD</button>
+      </div>
+      <div class="card table-card">
+        <table id="cashTable">
+          <thead><tr><th>Date</th><th>Shift</th><th>Employee</th><th>Type</th><th>Amount</th><th>Description</th><th></th></tr></thead>
+          <tbody id="cashBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================= CLOSE ======================= -->
+    <section class="sheet" id="sheet-close">
+      <div class="card toolbar">
+        <label>Shift
+          <select id="closeShift"><option>Shift 1</option><option>Shift 2</option></select>
+        </label>
+        <label>Employee <input id="closeEmployee" /></label>
+        <label>Opening Cash <input id="closeOpening" type="number" step="0.01" value="0" /></label>
+        <button class="btn primary" id="btnCloseShift">CLOSE SHIFT</button>
+      </div>
+      <div class="card table-card">
+        <table id="closeTable">
+          <thead><tr><th>Date</th><th>Shift</th><th>Employee</th><th>Opening</th><th>Total In</th><th>Total Out</th><th>Balance</th><th>Closed By</th></tr></thead>
+          <tbody id="closeBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================= SETTINGS ======================= -->
+    <section class="sheet" id="sheet-settings">
+      <div class="card form-card setting-grid">
+        <h2 class="form-title">Settings</h2>
+        <label>Company Name <input id="sCompany" /></label>
+        <label>VAT % <input id="sVat" type="number" step="0.01" /></label>
+        <label>Extra Charge % <input id="sExtra" type="number" step="0.01" /></label>
+        <div class="span2">
+          <label>Services List (one per line)</label>
+          <textarea id="sServices" rows="12"></textarea>
+        </div>
+        <button class="btn primary span2" id="btnSaveSettings">SAVE SETTINGS</button>
+      </div>
+    </section>
+
+    <!-- ======================= PRINT ======================= -->
+    <section class="sheet" id="sheet-print">
+      <div class="card toolbar">
+        <label>JC.NO <select id="printJc"></select></label>
+        <button class="btn primary" id="btnPrint">OPEN / PRINT JOB CARD</button>
+      </div>
+      <div class="print-out" id="printCard"></div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

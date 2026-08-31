@@ -145,48 +145,14 @@ $("btnSaveSettings").addEventListener("click", () => {
 // --------------------- masters ---------------------
 function renderServiceSelect() {
   const services = Array.isArray(state.settings.services) ? state.settings.services : DEFAULT_SERVICES;
-  const container = $("serviceMulti");
-  const optionsContainer = container.querySelector(".multiselect-options");
-  optionsContainer.innerHTML = services.map((s) => `<label class="multiselect-option"><input type="checkbox" value="${s}" /> <span>${s}</span></label>`).join("");
+  $("fService").innerHTML = services
+    .map((s) => `<option>${s}</option>`)
+    .join("");
 }
 
 function getSelectedServices() {
-  return Array.from($("serviceMulti").querySelectorAll('input[type="checkbox"]:checked')).map((cb) => cb.value);
+  return Array.from($("fService").selectedOptions).map((o) => o.value);
 }
-
-function openServiceDropdown() {
-  const container = $("serviceMulti");
-  const trigger = container.querySelector(".multiselect-trigger");
-  const options = container.querySelector(".multiselect-options");
-  const isOpen = options.classList.contains("open");
-  options.classList.toggle("open");
-  trigger.classList.toggle("open");
-  if (!isOpen) {
-    trigger.textContent = getSelectedServices().length ? `${getSelectedServices().length} selected ▴` : "Select services ▾";
-  }
-}
-
-function updateServiceTrigger() {
-  const selected = getSelectedServices();
-  const trigger = $("serviceMulti").querySelector(".multiselect-trigger");
-  trigger.textContent = selected.length ? `${selected.length} selected ▴` : "Select services ▾";
-}
-
-$("serviceMulti").querySelector(".multiselect-trigger").addEventListener("click", (e) => {
-  e.stopPropagation();
-  openServiceDropdown();
-});
-
-document.addEventListener("click", (e) => {
-  const container = $("serviceMulti");
-  if (!container.contains(e.target)) {
-    container.querySelector(".multiselect-options").classList.remove("open");
-    container.querySelector(".multiselect-trigger").classList.remove("open");
-    updateServiceTrigger();
-  }
-});
-
-$("serviceMulti").querySelector(".multiselect-options").addEventListener("change", updateServiceTrigger);
 
 $("btnAddService").addEventListener("click", () => {
   const name = prompt("Enter new service name:");
@@ -270,8 +236,7 @@ $("btnAdd").addEventListener("click", () => {
   $("fJc").value = "";
   ["fCustomer","fPhone","fVin","fPlate","fMechanic","fLabor","fReport","fCompany","fOdometer","fApproval"]
     .forEach((id) => { $(id).value = ""; });
-  $("serviceMulti").querySelectorAll('input[type="checkbox"]').forEach((cb) => { cb.checked = false; });
-  updateServiceTrigger();
+  Array.from($("fService").options).forEach((o) => { o.selected = false; });
   $("fStatus").value = "Diagnosis";
   $("fDate").value = today();
   $("fJc").focus();
@@ -300,11 +265,7 @@ document.addEventListener("click", (e) => {
     $("fMechanic").value = j.mechanic || "";
     $("fReport").value = j.report || "";
     $("fLabor").value = j.labor || "";
-    const selectedServices = Array.isArray(j.service) ? j.service : (j.service ? [j.service] : []);
-    $("serviceMulti").querySelectorAll('input[type="checkbox"]').forEach((cb) => {
-      cb.checked = selectedServices.includes(cb.value);
-    });
-    updateServiceTrigger();
+    Array.from($("fService").options).forEach((o) => { o.selected = Array.isArray(j.service) && j.service.includes(o.value); });
     document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
       b.classList.toggle("active", b.dataset.sheet === "master");
       b.setAttribute("aria-selected", b.dataset.sheet === "master" ? "true" : "false");

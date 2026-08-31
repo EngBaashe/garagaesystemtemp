@@ -184,9 +184,7 @@ function renderMaster() {
             <td>${j.report || ""}</td>
             <td class="num">${money(j.labor)}</td>
             <td class="num">${money(r.totalParts)}</td>
-            <td class="num">${money(state.settings.vat)}</td>
             <td class="num">${money(r.vat)}</td>
-            <td class="num">${money(state.settings.extra)}</td>
             <td class="num">${money(r.extra)}</td>
             <td class="num grand">${money(r.grand)}</td>
             <td><button class="btn small" data-edit-jc="${j.jc}">Edit</button></td>
@@ -194,7 +192,7 @@ function renderMaster() {
           </tr>`;
         })
         .join("")
-    : `<tr><td colspan="21" class="empty">No jobs yet. Fill the form above and click ADD NEW JOB.</td></tr>`;
+    : `<tr><td colspan="22" class="empty">No jobs yet. Fill the form above and click ADD NEW JOB.</td></tr>`;
 }
 
 $("btnAdd").addEventListener("click", () => {
@@ -378,10 +376,10 @@ function fillJcSelects() {
   const prevPartsJc = $("partsJc").value;
   const prevPrintJc = $("printJc").value;
   const opts = state.jobs.map((j) => `<option value="${j.jc}">${j.jc} — ${j.customer || "no customer"}</option>`).join("");
-  $("partsJc").innerHTML = opts || '<option value="">No jobs yet</option>';
-  $("printJc").innerHTML = opts || '<option value="">No jobs yet</option>';
-  if (prevPartsJc && state.jobs.some((j) => j.jc === prevPartsJc)) $("partsJc").value = prevPartsJc;
-  if (prevPrintJc && state.jobs.some((j) => j.jc === prevPrintJc)) $("printJc").value = prevPrintJc;
+  $("partsJcList").innerHTML = opts || '<option value="">No jobs yet</option>';
+  $("printJcList").innerHTML = opts || '<option value="">No jobs yet</option>';
+  if (prevPartsJc) $("partsJc").value = prevPartsJc;
+  if (prevPrintJc) $("printJc").value = prevPrintJc;
 }
 function renderParts() {
   fillJcSelects();
@@ -610,7 +608,7 @@ $("btnPrint").addEventListener("click", () => {
 });
 
 ["printJc", "partsJc"].forEach((id) => {
-  $(id).addEventListener("change", () => {
+  $(id).addEventListener("input", () => {
     if (id === "partsJc") renderParts();
     else renderPrintCard();
   });

@@ -91,8 +91,7 @@
             <th>JC.NO</th><th>Date</th><th>Customer</th><th>Company</th><th>Phone</th>
             <th>Plate</th><th>VIN</th><th>Odometer</th><th>Service</th><th>Status</th>
             <th>Approval</th><th>Mechanic</th><th>Report</th><th>Labor</th>
-            <th>Total Parts</th><th>VAT %</th><th>VAT</th><th>Extra %</th><th>Extra</th>
-            <th>Grand Total</th><th></th>
+            <th>Total Parts</th><th>VAT</th><th>Extra</th><th>Grand Total</th><th></th><th></th>
           </tr>
           </thead>
           <tbody id="masterBody"></tbody>
@@ -103,7 +102,10 @@
     <!-- ======================= PARTS ======================= -->
     <section class="sheet" id="sheet-parts" aria-labelledby="tab-parts">
       <div class="card toolbar">
-        <label>JC.NO <select id="partsJc"></select></label>
+        <label>JC.NO
+          <input id="partsJc" list="partsJcList" placeholder="Search JC.NO..." />
+          <datalist id="partsJcList"></datalist>
+        </label>
         <label>Part Name <input id="pName" /></label>
         <label>QTY <input id="pQty" type="number" value="1" min="1" /></label>
         <label>Unit Price <input id="pPrice" type="number" step="0.01" /></label>
@@ -179,7 +181,10 @@
     <!-- ======================= PRINT ======================= -->
     <section class="sheet" id="sheet-print" aria-labelledby="tab-print">
       <div class="card toolbar">
-        <label>JC.NO <select id="printJc"></select></label>
+        <label>JC.NO
+          <input id="printJc" list="printJcList" placeholder="Search JC.NO..." />
+          <datalist id="printJcList"></datalist>
+        </label>
         <button class="btn primary" id="btnPrint">OPEN / PRINT JOB CARD</button>
       </div>
       <div class="print-out" id="printCard" role="region" aria-live="polite"></div>

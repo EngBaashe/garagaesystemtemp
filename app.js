@@ -60,7 +60,10 @@ function jobRow(j) {
 // --------------------- navigation ---------------------
 document.querySelectorAll(".tab").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".tab").forEach((b) => {
+      b.classList.toggle("active", b === btn);
+      b.setAttribute("aria-selected", b === btn ? "true" : "false");
+    });
     document.querySelectorAll(".sheet").forEach((s) => s.classList.remove("active"));
     $("sheet-" + btn.dataset.sheet).classList.add("active");
   });
@@ -302,11 +305,14 @@ function printCloseHandover(c) {
 }
 
 function printCss() {
-  return `.print-out{width:210mm;min-height:280mm;margin:0 auto;padding:14mm;font-size:13px;font-family:system-ui;color:#111}
-  .p-head .name{font-size:20px;font-weight:800;color:#1f2937}.p-head .serv{font-size:11px;font-style:italic;color:#444}
-  .p-title{text-align:center;font-size:16px;font-weight:700;margin:14px 0}.p-field{display:grid;grid-template-columns:140px 1fr;gap:8px;margin-top:10px}
-  .p-sign{margin-top:30px}.p-sign span{display:inline-block;min-width:220px;height:26px;border-bottom:1px dashed #333}
-  @media print{body{margin:0}}`;
+  return `.print-out{width:210mm;min-height:280mm;margin:0 auto;padding:14mm;font-size:13px;font-family:system-ui,sans-serif;color:#111;background:#fff;border-radius:10px}
+  .p-head .name{font-size:22px;font-weight:800;color:#0f172a;letter-spacing:.3px}.p-head .serv{font-size:11px;font-style:italic;color:#64748b;margin-top:4px}
+  .p-title{text-align:center;font-size:17px;font-weight:700;margin:16px 0;letter-spacing:1px}.p-field{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin-top:10px}
+  .p-field b{font-weight:600;color:#374151}.p-sign{margin-top:30px}.p-sign span{display:inline-block;min-width:220px;height:24px;border-bottom:1px dashed #333}
+  .p-table{border-collapse:collapse;width:100%;margin:8px 0}.p-table th,.p-table td{border:1px solid #333;padding:6px 10px;text-align:left}
+  .p-table th{background:#d1d5db;color:#111}.p-totals{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:14px}
+  .p-totals div{display:flex;justify-content:space-between;padding:4px 0}.p-grand{font-weight:800;font-size:15px;color:#4f46e5}
+  @media print{body{margin:0}.print-out{box-shadow:none;width:100%;min-height:auto;padding:10mm}}`;
 }
 
 // --------------------- print job card ---------------------

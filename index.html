@@ -3,32 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Garage Management System - Job cards, parts, cash, and shift management" />
   <title>Garage System</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="topbar">
+  <a href="#sheets" class="visually-hidden">Skip to content</a>
+  <header class="topbar" role="banner">
     <div class="brand">
       <h1 id="brandName">AUTO EXPERT &amp; GENUINE PARTS</h1>
       <span class="tagline">Diagnostic • Service • Major Repairs • Car Wash • Genuine Parts • Tires • A/C</span>
     </div>
-    <nav class="tabs" id="tabs">
-      <button class="tab active" data-sheet="master">MASTER</button>
-      <button class="tab" data-sheet="parts">PARTS</button>
-      <button class="tab" data-sheet="cash">CASH</button>
-      <button class="tab" data-sheet="close">CLOSE</button>
-      <button class="tab" data-sheet="settings">SETTINGS</button>
-      <button class="tab" data-sheet="print">PRINT</button>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Main navigation">
+      <button class="tab active" role="tab" aria-selected="true" data-sheet="master">MASTER</button>
+      <button class="tab" role="tab" aria-selected="false" data-sheet="parts">PARTS</button>
+      <button class="tab" role="tab" aria-selected="false" data-sheet="cash">CASH</button>
+      <button class="tab" role="tab" aria-selected="false" data-sheet="close">CLOSE</button>
+      <button class="tab" role="tab" aria-selected="false" data-sheet="settings">SETTINGS</button>
+      <button class="tab" role="tab" aria-selected="false" data-sheet="print">PRINT</button>
     </nav>
   </header>
 
-  <main id="sheets">
+  <main id="sheets" role="main">
 
     <!-- ======================= MASTER ======================= -->
-    <section class="sheet active" id="sheet-master">
+    <section class="sheet active" id="sheet-master" aria-labelledby="tab-master">
       <div class="card form-card">
-        <h2 class="form-title">Job Card / Performa</h2>
+        <h2 class="form-title" id="tab-master">Job Card / Performa</h2>
         <div class="form-grid" id="masterForm">
           <label>JC.NO <input id="fJc" /></label>
           <label>Status
@@ -74,7 +76,7 @@
     </section>
 
     <!-- ======================= PARTS ======================= -->
-    <section class="sheet" id="sheet-parts">
+    <section class="sheet" id="sheet-parts" aria-labelledby="tab-parts">
       <div class="card toolbar">
         <label>JC.NO <select id="partsJc"></select></label>
         <label>Part Name <input id="pName" /></label>
@@ -95,7 +97,7 @@
     </section>
 
     <!-- ======================= CASH ======================= -->
-    <section class="sheet" id="sheet-cash">
+    <section class="sheet" id="sheet-cash" aria-labelledby="tab-cash">
       <div class="card toolbar">
         <label>Shift
           <select id="cShift"><option>Shift 1</option><option>Shift 2</option></select>
@@ -118,7 +120,7 @@
     </section>
 
     <!-- ======================= CLOSE ======================= -->
-    <section class="sheet" id="sheet-close">
+    <section class="sheet" id="sheet-close" aria-labelledby="tab-close">
       <div class="card toolbar">
         <label>Shift
           <select id="closeShift"><option>Shift 1</option><option>Shift 2</option></select>
@@ -136,9 +138,9 @@
     </section>
 
     <!-- ======================= SETTINGS ======================= -->
-    <section class="sheet" id="sheet-settings">
+    <section class="sheet" id="sheet-settings" aria-labelledby="tab-settings">
       <div class="card form-card setting-grid">
-        <h2 class="form-title">Settings</h2>
+        <h2 class="form-title" id="tab-settings">Settings</h2>
         <label>Company Name <input id="sCompany" /></label>
         <label>VAT % <input id="sVat" type="number" step="0.01" /></label>
         <label>Extra Charge % <input id="sExtra" type="number" step="0.01" /></label>
@@ -151,12 +153,12 @@
     </section>
 
     <!-- ======================= PRINT ======================= -->
-    <section class="sheet" id="sheet-print">
+    <section class="sheet" id="sheet-print" aria-labelledby="tab-print">
       <div class="card toolbar">
         <label>JC.NO <select id="printJc"></select></label>
         <button class="btn primary" id="btnPrint">OPEN / PRINT JOB CARD</button>
       </div>
-      <div class="print-out" id="printCard"></div>
+      <div class="print-out" id="printCard" role="region" aria-live="polite"></div>
     </section>
 
   </main>

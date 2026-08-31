@@ -130,7 +130,7 @@ function renderMaster() {
             <td><b>${j.jc}</b></td><td>${j.date}</td><td>${j.customer}</td>
             <td>${j.company}</td><td>${j.phone}</td><td>${j.plate}</td>
             <td>${j.vin}</td><td>${j.odometer}</td><td>${j.service}</td>
-            <td><span class="status ${j.status.replace(/\s/g, "")}">${j.status}</span></td>
+            <td><span class="status ${(j.status || "").replace(/\s/g, "")}">${j.status || ""}</span></td>
             <td>${j.approval}</td><td>${j.mechanic}</td>
             <td class="num">${money(j.labor)}</td>
             <td class="num">${money(r.totalParts)}</td>
@@ -175,11 +175,13 @@ $("btnAdd").addEventListener("click", () => {
   }
   save();
   renderAll();
-  ["fJc","fCustomer","fPhone","fVin","fPlate","fMechanic","fLabor","fReport","fCompany","fOdometer","fApproval"]
+  $("fJc").value = "";
+  ["fCustomer","fPhone","fVin","fPlate","fMechanic","fLabor","fReport","fCompany","fOdometer","fApproval"]
     .forEach((id) => { $(id).value = ""; });
-  $("fService").value = state.settings.services[0] || "";
+  $("fService").value = (state.settings.services && state.settings.services[0]) || "";
   $("fStatus").value = "Diagnosis";
   $("fDate").value = today();
+  $("fJc").focus();
 });
 
 document.addEventListener("click", (e) => {
@@ -331,13 +333,13 @@ function printCloseHandover(c) {
 }
 
 function printCss() {
-  return `.print-out{width:210mm;min-height:280mm;margin:0 auto;padding:14mm;font-size:13px;font-family:system-ui,sans-serif;color:#1A1A1A;background:#fff;border-radius:10px;border-top:4px solid #ED0000}
+  return `.print-out{width:210mm;min-height:280mm;margin:0 auto;padding:14mm;font-size:13px;font-family:system-ui,sans-serif;color:#1A1A1A;background:#fff;border-radius:10px;border-top:4px solid #2563eb}
   .p-head .name{font-size:22px;font-weight:800;color:#1F2937;letter-spacing:.3px}.p-head .serv{font-size:11px;font-style:italic;color:#4b5563;margin-top:4px}
   .p-title{text-align:center;font-size:17px;font-weight:700;margin:16px 0;letter-spacing:1px;color:#1F2937}.p-field{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin-top:10px}
   .p-field b{font-weight:600;color:#1F2937}.p-sign{margin-top:30px}.p-sign span{display:inline-block;min-width:220px;height:24px;border-bottom:1px dashed #1F2937}
   .p-table{border-collapse:collapse;width:100%;margin:8px 0}.p-table th,.p-table td{border:1px solid #1F2937;padding:6px 10px;text-align:left}
   .p-table th{background:#1F2937;color:#fff}.p-totals{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:14px}
-  .p-totals div{display:flex;justify-content:space-between;padding:4px 0}.p-grand{font-weight:800;font-size:15px;color:#ED0000}
+  .p-totals div{display:flex;justify-content:space-between;padding:4px 0}.p-grand{font-weight:800;font-size:15px;color:#2563eb}
   @media print{body{margin:0}.print-out{box-shadow:none;width:100%;min-height:auto;padding:10mm}}`;
 }
 

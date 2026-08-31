@@ -143,14 +143,53 @@ $("btnSaveSettings").addEventListener("click", () => {
 });
 
 // --------------------- masters ---------------------
-function renderServiceSelect() {
-  const services = Array.isArray(state.settings.services) ? state.settings.services : DEFAULT_SERVICES;
-  $("fService").innerHTML = services
-    .map((s) => `<option>${s}</option>`)
-    .join("");
+function getSelectedServices() {
+  return Array.from($("serviceTagList").children).map((tag) => tag.dataset.value);
 }
+
+function renderServiceTags(selected) {
+  const list = $("serviceTagList");
+  list.innerHTML = "";
+  const services = Array.isArray(state.settings.services) ? state.settings.services : DEFAULT_SERVICES;
+  const selectedArray = Array.isArray(selected) ? selected : (selected ? [selected] : []);
+  selectedArray.forEach((s) => {
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.dataset.value = s;
+    tag.innerHTML = `${s} <button type="button" class="tag-remove" data-remove-service="${s}">×</button>`;
+    list.appendChild(tag);
+  });
+}
+
+function addServiceTag(name) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  const services = Array.isArray(state.settings.services) ? state.settings.services : DEFAULT_SERVICES;
+  if (!services.includes(trimmed)) {
+    services.push(trimmed);
+    state.settings.services = services;
+  }
+  renderServiceTags(getSelectedServices());
+}
+
+$("fServiceInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    addServiceTag($("fServiceInput").value);
+    $("fServiceInput").value = "";
+  }
+});
+
+document.addEventListener("click", (e) => {
+  const removeService = e.target.dataset && e.target.dataset.removeService;
+  if (removeService != null) {
+    const current = getSelectedServices().filter((s) => s !== removeService);
+    renderServiceTags(current);
+  }
+});
+
 function renderMaster() {
-  renderServiceSelect();
+  renderServiceTags([]);
   const body = $("masterBody");
   body.innerHTML = state.jobs.length
     ? state.jobs
@@ -172,7 +211,7 @@ function renderMaster() {
             <td class="num">${money(r.extra)}</td>
             <td class="num grand">${money(r.grand)}</td>
             <td><button class="btn small" data-edit-jc="${j.jc}">Edit</button></td>
-            <td><button class="btn danger small" data-del-jc="${j.jc}">✕</button></td>
+            <td><button class="btn danger small" data-del-jc="${j.jc}">Delete</button></td>
           </tr>`;
         })
         .join("")
@@ -182,7 +221,7 @@ function renderMaster() {
 $("btnAdd").addEventListener("click", () => {
   const jc = $("fJc").value.trim();
   if (!jc) { alert("JC.NO is required."); return; }
-  const service = Array.from($("fService").selectedOptions).map((o) => o.value);
+  const service = getSelectedServices();
   if (state.jobs.some((j) => j.jc === jc)) {
     let job = state.jobs.find((j) => j.jc === jc);
     Object.assign(job, {
@@ -216,7 +255,7 @@ $("btnAdd").addEventListener("click", () => {
   $("fJc").value = "";
   ["fCustomer","fPhone","fVin","fPlate","fMechanic","fLabor","fReport","fCompany","fOdometer","fApproval"]
     .forEach((id) => { $(id).value = ""; });
-  Array.from($("fService").options).forEach((o) => { o.selected = false; });
+  renderServiceTags([]);
   $("fStatus").value = "Diagnosis";
   $("fDate").value = today();
   $("fJc").focus();
@@ -245,7 +284,7 @@ document.addEventListener("click", (e) => {
     $("fMechanic").value = j.mechanic || "";
     $("fReport").value = j.report || "";
     $("fLabor").value = j.labor || "";
-    Array.from($("fService").options).forEach((o) => { o.selected = Array.isArray(j.service) && j.service.includes(o.value); });
+    renderServiceTags(Array.isArray(j.service) ? j.service : (j.service ? [j.service] : []));
     document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
       b.classList.toggle("active", b.dataset.sheet === "master");
       b.setAttribute("aria-selected", b.dataset.sheet === "master" ? "true" : "false");
@@ -375,7 +414,7 @@ function renderParts() {
         <td class="num">${money(p.price)}</td><td>${p.source}</td>
         <td class="num grand">${money(p.qty * p.price)}</td>
         <td><button class="btn small" data-edit-part="${i}">Edit</button></td>
-        <td><button class="btn danger small" data-del-part="${i}">✕</button></td>
+        <td><button class="btn danger small" data-del-part="${i}">Delete</button></td>
       </tr>`).join("")
     : `<tr><td colspan="8" class="empty">No parts for JC ${jc || ""}. Add parts below.</td></tr>`;
 }
@@ -424,7 +463,7 @@ function renderCash() {
           <td>${c.type}</td><td class="num ${c.type === "Cash In" ? "grand" : "grand"}">${money(c.amount)}</td>
           <td>${c.description}</td>
           <td><button class="btn small" data-edit-cash="${i}">Edit</button></td>
-          <td><button class="btn danger small" data-del-cash="${i}">✕</button></td>
+          <td><button class="btn danger small" data-del-cash="${i}">Delete</button></td>
         </tr>`)
         .reverse()
         .join("")
@@ -471,7 +510,7 @@ function renderClose() {
         <td class="num">${money(c.totalOut)}</td><td class="num grand">${money(c.balance)}</td>
         <td>${c.closedBy}</td>
         <td><button class="btn small" data-edit-close="${i}">Edit</button></td>
-        <td><button class="btn danger small" data-del-close="${i}">✕</button></td>
+        <td><button class="btn danger small" data-del-close="${i}">Delete</button></td>
       </tr>`).join("")
     : `<tr><td colspan="10" class="empty">No shift closings yet.</td></tr>`;
 }
@@ -491,6 +530,8 @@ $("btnCloseShift").addEventListener("click", () => {
     state.closes.unshift({ date: today(), shift, employee: emp, opening, totalIn: inAmt, totalOut: outAmt, balance, closedBy: emp });
     window.printCloseHandover(state.closes[0]);
   }
+  save();
+  renderClose();
 });
 
 function printCloseHandover(c) {

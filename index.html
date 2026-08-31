@@ -70,7 +70,12 @@
           <label>VIN/Model <input id="fVin" /></label>
           <label>Odometer (Km) <input id="fOdometer" type="number" /></label>
           <label class="span2">Assigned Mechanic <input id="fMechanic" /></label>
-          <label>Service Type <select id="fService" multiple size="4"></select></label>
+          <label class="span2">Service Type
+            <div class="tag-input" id="serviceTagInput">
+              <div class="tag-list" id="serviceTagList"></div>
+              <input type="text" id="fServiceInput" placeholder="Type service and press Enter" />
+            </div>
+          </label>
           <label class="span2">Mechanic's Report <input id="fReport" /></label>
           <label>Labor Cost <input id="fLabor" type="number" step="0.01" /></label>
         </div>

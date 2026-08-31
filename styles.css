@@ -405,6 +405,77 @@ textarea {
   border-radius: var(--radius-sm);
 }
 
+/* ========== TAG INPUT ========== */
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  min-height: 44px;
+  align-items: center;
+}
+
+.tag-input:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-light);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.tag-remove:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tag-input input {
+  border: none;
+  outline: none;
+  padding: 6px;
+  font-size: 13px;
+  flex: 1;
+  min-width: 120px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tag-input input:focus {
+  box-shadow: none;
+}
+
 /* ========== TOOLBARS ========== */
 .toolbar {
   display: flex;

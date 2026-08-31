@@ -605,7 +605,6 @@ function renderPrintCard() {
         <div><b>Phone</b><span>${j.phone}</span></div>
         <div><b>Plate</b><span>${j.plate}</span></div>
         <div><b>VIN/Model</b><span>${j.vin}</span></div>
-        <div><b>Service Type</b><span>${serviceLines || "-"}</span></div>
         <div><b>Odometer</b><span>${j.odometer || 0} Km</span></div>
         <div><b>Mechanic</b><span>${j.mechanic}</span></div>
         <div><b>Status</b><span>${j.status || "-"}</span></div>
@@ -616,6 +615,9 @@ function renderPrintCard() {
         <tbody>${partRows}${partsTotalRow}</tbody>
       </table>
       <div style="margin-top:12px"><b>Mechanic's Report:</b> ${j.report || "No report added"}</div>
+      <div class="p-field">
+        <div><b>Service Type</b><span>${serviceLines || "-"}</span></div>
+      </div>
       <div class="p-totals">
         <div><span>Total Parts Cost</span><span>${money(r.totalParts)}</span></div>
         <div><span>Labor Cost</span><span>${money(j.labor || 0)}</span></div>

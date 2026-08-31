@@ -1,4 +1,5 @@
 const DB_KEY = "garage_system_v1";
+const AUTH_KEY = "garage_system_auth";
 
 const DEFAULT_SERVICES = [
   "Diagnostic with high computer technology",
@@ -13,6 +14,8 @@ const DEFAULT_SERVICES = [
   "A/C service",
   "Tires balance service",
 ];
+
+const DEFAULT_PASSWORD = "admin123";
 
 const state = {
   settings: {
@@ -40,27 +43,51 @@ function load() {
   } catch (e) { console.error(e); }
 }
 
+function saveAuth() { localStorage.setItem(AUTH_KEY, "1"); }
+function clearAuth() { localStorage.removeItem(AUTH_KEY); }
+function isAuthenticated() { return localStorage.getItem(AUTH_KEY) === "1"; }
+
 const $ = (id) => document.getElementById(id);
 const money = (n) => (n == null || isNaN(n) ? "0.00" : Number(n).toFixed(2));
 const today = () => new Date().toISOString().slice(0, 10);
 
-// --------------------- computed helpers ---------------------
-function partsTotal(jc) {
-  return state.parts.filter((p) => p.jc === jc).reduce((s, p) => s + p.qty * p.price, 0);
-}
-function jobRow(j) {
-  const totalParts = partsTotal(j.jc);
-  const labor = Number(j.labor) || 0;
-  const vat = (labor + totalParts) * (state.settings.vat / 100);
-  const extra = (labor + totalParts) * (state.settings.extra / 100);
-  const grand = labor + totalParts + vat + extra;
-  return { totalParts, vat, extra, grand };
+// --------------------- login/logout ---------------------
+function showLogin() {
+  $("loginOverlay").classList.remove("hidden");
+  $("mainContent").classList.add("hidden");
+  $("topbar").classList.add("hidden");
+  $("loginPassword").value = "";
+  setTimeout(() => $("loginPassword").focus(), 100);
 }
 
+function hideLogin() {
+  $("loginOverlay").classList.add("hidden");
+  $("mainContent").classList.remove("hidden");
+  $("topbar").classList.remove("hidden");
+}
+
+$("loginForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const pw = $("loginPassword").value;
+  if (pw === DEFAULT_PASSWORD) {
+    saveAuth();
+    hideLogin();
+  } else {
+    alert("Incorrect password. Please try again.");
+    $("loginPassword").value = "";
+    $("loginPassword").focus();
+  }
+});
+
+$("btnLogout").addEventListener("click", () => {
+  clearAuth();
+  showLogin();
+});
+
 // --------------------- navigation ---------------------
-document.querySelectorAll(".tab").forEach((btn) => {
+document.querySelectorAll(".tab[data-sheet]").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach((b) => {
+    document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
       b.classList.toggle("active", b === btn);
       b.setAttribute("aria-selected", b === btn ? "true" : "false");
     });
@@ -275,7 +302,6 @@ $("btnCloseShift").addEventListener("click", () => {
   state.closes.unshift({ date: today(), shift, employee: emp, opening, totalIn: inAmt, totalOut: outAmt, balance, closedBy: emp });
   save();
   renderClose();
-  // Load the close result into the PRINT CLOSE view? We show a confirmation with the handover.
   window.printCloseHandover(state.closes[0]);
 });
 
@@ -305,13 +331,13 @@ function printCloseHandover(c) {
 }
 
 function printCss() {
-  return `.print-out{width:210mm;min-height:280mm;margin:0 auto;padding:14mm;font-size:13px;font-family:system-ui,sans-serif;color:#111;background:#fff;border-radius:10px}
-  .p-head .name{font-size:22px;font-weight:800;color:#0f172a;letter-spacing:.3px}.p-head .serv{font-size:11px;font-style:italic;color:#64748b;margin-top:4px}
-  .p-title{text-align:center;font-size:17px;font-weight:700;margin:16px 0;letter-spacing:1px}.p-field{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin-top:10px}
-  .p-field b{font-weight:600;color:#374151}.p-sign{margin-top:30px}.p-sign span{display:inline-block;min-width:220px;height:24px;border-bottom:1px dashed #333}
-  .p-table{border-collapse:collapse;width:100%;margin:8px 0}.p-table th,.p-table td{border:1px solid #333;padding:6px 10px;text-align:left}
-  .p-table th{background:#d1d5db;color:#111}.p-totals{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:14px}
-  .p-totals div{display:flex;justify-content:space-between;padding:4px 0}.p-grand{font-weight:800;font-size:15px;color:#4f46e5}
+  return `.print-out{width:210mm;min-height:280mm;margin:0 auto;padding:14mm;font-size:13px;font-family:system-ui,sans-serif;color:#1A1A1A;background:#fff;border-radius:10px;border-top:4px solid #ED0000}
+  .p-head .name{font-size:22px;font-weight:800;color:#1F2937;letter-spacing:.3px}.p-head .serv{font-size:11px;font-style:italic;color:#4b5563;margin-top:4px}
+  .p-title{text-align:center;font-size:17px;font-weight:700;margin:16px 0;letter-spacing:1px;color:#1F2937}.p-field{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin-top:10px}
+  .p-field b{font-weight:600;color:#1F2937}.p-sign{margin-top:30px}.p-sign span{display:inline-block;min-width:220px;height:24px;border-bottom:1px dashed #1F2937}
+  .p-table{border-collapse:collapse;width:100%;margin:8px 0}.p-table th,.p-table td{border:1px solid #1F2937;padding:6px 10px;text-align:left}
+  .p-table th{background:#1F2937;color:#fff}.p-totals{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:14px}
+  .p-totals div{display:flex;justify-content:space-between;padding:4px 0}.p-grand{font-weight:800;font-size:15px;color:#ED0000}
   @media print{body{margin:0}.print-out{box-shadow:none;width:100%;min-height:auto;padding:10mm}}`;
 }
 
@@ -366,8 +392,8 @@ $("btnPrint").addEventListener("click", () => {
   const w = window.open("", "_blank");
   if (w) {
     w.document.write(`<html><head><title>JobCard_${jc}</title><style>${printCss()}
-      table.p-table{border-collapse:collapse;width:100%}.p-table th,.p-table td{border:1px solid #333;padding:4px 8px;text-align:left}
-      .p-table th{background:#d1d5db}.num{text-align:right}
+      table.p-table{border-collapse:collapse;width:100%}.p-table th,.p-table td{border:1px solid #1F2937;padding:4px 8px;text-align:left}
+      .p-table th{background:#1F2937;color:#fff}.num{text-align:right}
     </style></head><body>${$("printCard").innerHTML}</body></html>`);
     w.document.close();
     setTimeout(() => w.print(), 300);
@@ -393,5 +419,14 @@ function renderAll() {
   renderPrintCard();
 }
 
-load();
-renderAll();
+function init() {
+  load();
+  if (isAuthenticated()) {
+    hideLogin();
+    renderAll();
+  } else {
+    showLogin();
+  }
+}
+
+init();

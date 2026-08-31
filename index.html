@@ -9,10 +9,28 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <a href="#sheets" class="visually-hidden">Skip to content</a>
-  <header class="topbar" role="banner">
+  <a href="#mainContent" class="visually-hidden">Skip to content</a>
+
+  <!-- Login Overlay -->
+  <div id="loginOverlay" class="login-overlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">G</div>
+        <h2 id="loginTitle">Garage System</h2>
+        <p>Please sign in to continue</p>
+      </div>
+      <form id="loginForm" class="login-form" autocomplete="off">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" placeholder="Enter password" required minlength="4" />
+        <button type="submit" class="btn primary full-width">SIGN IN</button>
+        <p class="login-hint">Default: admin123</p>
+      </form>
+    </div>
+  </div>
+
+  <header id="topbar" class="topbar" role="banner">
     <div class="brand">
-      <h1 id="brandName">AUTO EXPERT &amp; GENUINE PARTS</h1>
+      <h1 id="brandName">AUTO EXPERT &amp; <span class="accent-text">GENUINE PARTS</span></h1>
       <span class="tagline">Diagnostic • Service • Major Repairs • Car Wash • Genuine Parts • Tires • A/C</span>
     </div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="Main navigation">
@@ -22,10 +40,11 @@
       <button class="tab" role="tab" aria-selected="false" data-sheet="close">CLOSE</button>
       <button class="tab" role="tab" aria-selected="false" data-sheet="settings">SETTINGS</button>
       <button class="tab" role="tab" aria-selected="false" data-sheet="print">PRINT</button>
+      <button class="tab logout-tab" id="btnLogout" role="tab" aria-selected="false">LOGOUT</button>
     </nav>
   </header>
 
-  <main id="sheets" role="main">
+  <main id="mainContent" role="main">
 
     <!-- ======================= MASTER ======================= -->
     <section class="sheet active" id="sheet-master" aria-labelledby="tab-master">

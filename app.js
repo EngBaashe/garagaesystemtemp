@@ -513,38 +513,58 @@ $("btnCloseShift").addEventListener("click", () => {
 
 function printCloseHandover(c) {
   const html = `<div class="print-out">
-    <div class="p-head"><div class="name">${state.settings.company}</div>
-      <div class="serv">Shift Handover — ${c.date}</div></div>
-    <div class="p-title">SHIFT CLOSE REPORT</div>
-    <div class="p-field">
-      <b>Shift:</b><span>${c.shift}</span>
-      <b>Employee:</b><span>${c.employee}</span>
-      <b>Opening Cash:</b><span>${money(c.opening)}</span>
-      <b>Total Cash In:</b><span>${money(c.totalIn)}</span>
-      <b>Total Cash Out:</b><span>${money(c.totalOut)}</span>
-      <b>Remaining Balance:</b><span>${money(c.balance)}</span>
-      <b>Closed By:</b><span>${c.closedBy}</span>
+    <div class="p-header">
+      <div class="name">${state.settings.company}</div>
+      <div class="serv">Shift Handover — ${c.date}</div>
     </div>
-    <div class="p-sign"><span></span><br/><small>Signature</small></div>
+    <div class="p-body">
+      <div class="p-title">Shift Close Report</div>
+      <div class="p-field">
+        <div><b>Shift</b><span>${c.shift}</span></div>
+        <div><b>Employee</b><span>${c.employee}</span></div>
+        <div><b>Opening Cash</b><span>${money(c.opening)}</span></div>
+        <div><b>Total Cash In</b><span>${money(c.totalIn)}</span></div>
+        <div><b>Total Cash Out</b><span>${money(c.totalOut)}</span></div>
+        <div><b>Remaining Balance</b><span>${money(c.balance)}</span></div>
+        <div><b>Closed By</b><span>${c.closedBy}</span></div>
+      </div>
+      <div class="p-sign-area">
+        <div class="p-sign"><span></span><small>Prepared By</small></div>
+        <div class="p-sign"><span></span><small>Approved By</small></div>
+      </div>
+    </div>
   </div>`;
   $("printCard").innerHTML = html;
-  const w = window.open("", "_blank");
+  const w = window.open("", "_blank", "width=900,height=700");
   if (w) {
-    w.document.write(`<html><head><title>Shift Close</title><style>${printCss()}</style></head><body>${html}</body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><title>ShiftClose_${c.date}</title>
+      <style>${printCss()}@page{size:A4;margin:0}body{font-family:system-ui,sans-serif;margin:0;padding:0;background:#fff}</style>
+    </head><body>${html}</body></html>`);
     w.document.close();
-    setTimeout(() => w.print(), 300);
+    w.focus();
+    setTimeout(() => { w.print(); w.close(); }, 400);
   }
 }
 
 function printCss() {
-  return `.print-out{width:210mm;min-height:280mm;margin:0 auto;padding:14mm;font-size:13px;font-family:system-ui,sans-serif;color:#1A1A1A;background:#fff;border-radius:10px;border-top:4px solid #2563eb}
-  .p-head .name{font-size:22px;font-weight:800;color:#1F2937;letter-spacing:.3px}.p-head .serv{font-size:11px;font-style:italic;color:#4b5563;margin-top:4px}
-  .p-title{text-align:center;font-size:17px;font-weight:700;margin:16px 0;letter-spacing:1px;color:#1F2937}.p-field{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin-top:10px}
-  .p-field b{font-weight:600;color:#1F2937}.p-sign{margin-top:30px}.p-sign span{display:inline-block;min-width:220px;height:24px;border-bottom:1px dashed #1F2937}
-  .p-table{border-collapse:collapse;width:100%;margin:8px 0}.p-table th,.p-table td{border:1px solid #1F2937;padding:6px 10px;text-align:left}
-  .p-table th{background:#1F2937;color:#fff}.p-totals{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:14px}
-  .p-totals div{display:flex;justify-content:space-between;padding:4px 0}.p-grand{font-weight:800;font-size:15px;color:#2563eb}
-  @media print{body{margin:0}.print-out{box-shadow:none;width:100%;min-height:auto;padding:10mm}}`;
+  return `.print-out{width:210mm;min-height:297mm;margin:20px auto;padding:0;font-size:12px;font-family:system-ui,sans-serif;color:#1A1A1A;background:#fff;border-radius:10px;border-top:6px solid #2563eb;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+  .p-header{background:#1F2937;color:#fff;padding:16px 20px;border-radius:10px 10px 0 0}.p-header .name{font-size:20px;font-weight:800;letter-spacing:.3px;margin-bottom:2px}
+  .p-header .serv{font-size:11px;color:#9ca3af;font-style:italic}.p-body{padding:20px}
+  .p-title{text-align:center;font-size:16px;font-weight:700;margin:16px 0;letter-spacing:1.5px;color:#1F2937;text-transform:uppercase}
+  .p-field{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 16px;margin:16px 0;padding:12px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
+  .p-field>div{display:flex;justify-content:space-between;gap:8px;padding:4px 0}.p-field b{font-weight:600;color:#374151;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+  .p-parts-title{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:#1F2937;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid #1F2937}
+  .p-table{border-collapse:collapse;width:100%;margin:8px 0}.p-table th,.p-table td{border:1px solid #d1d5db;padding:7px 10px;text-align:left;font-size:12px}
+  .p-table th{background:#1F2937;color:#fff;font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.03em}
+  .p-table tbody tr:nth-child(even){background:#f9fafb}.p-table .num{text-align:right;font-variant-numeric:tabular-nums}
+  .p-totals{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-top:16px;padding:14px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
+  .p-totals div{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #e5e7eb}.p-totals div:last-child{border-bottom:none}
+  .p-grand{font-weight:800;font-size:15px;color:#2563eb}.p-sign-area{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .p-sign{text-align:center}.p-sign span{display:inline-block;width:100%;min-width:180px;height:40px;border-bottom:1px dashed #1F2937;margin-top:24px}
+  .p-sign small{display:block;margin-top:4px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em}
+  .p-note{margin-top:16px;font-size:11px;color:#6b7280;font-style:italic;text-align:center;padding:10px;background:#fef3c7;border-radius:6px;border-left:3px solid #f59e0b}
+  @media print{body{margin:0;background:#fff}.print-out{box-shadow:none;width:100%;min-height:auto;padding:0;margin:0;border-radius:0;border-top:none}
+  .p-header{border-radius:0}.p-header,.p-body{padding-left:10mm;padding-right:10mm}}`;
 }
 
 // --------------------- print job card ---------------------
@@ -557,38 +577,58 @@ function renderPrintCard() {
   const r = jobRow(j);
   const serviceLines = Array.isArray(j.service) ? j.service.join(" • ") : (j.service || "");
   const partRows = parts.length
-    ? parts.map((p) => `<tr><td>${p.name}</td><td class="num">${p.qty}</td><td class="num">${money(p.price)}</td><td class="num">${money(p.qty * p.price)}</td><td>${p.source}</td></tr>`).join("")
-    : `<tr><td colspan="5" style="text-align:center">No parts listed</td></tr>`;
+    ? parts.map((p) => `<tr>
+        <td>${p.name}</td>
+        <td class="num">${p.qty}</td>
+        <td class="num">${money(p.price)}</td>
+        <td class="num">${money(p.qty * p.price)}</td>
+        <td>${p.source}</td>
+      </tr>`).join("")
+    : `<tr><td colspan="5" style="text-align:center;color:#9ca3af;font-style:italic">No parts added for this job</td></tr>`;
+  const partsTotalRow = parts.length
+    ? `<tr style="background:#f3f4f6;font-weight:600">
+        <td colspan="3" style="text-align:right">Parts Total</td>
+        <td class="num">${money(r.totalParts)}</td><td></td>
+      </tr>`
+    : "";
   $("printCard").innerHTML = `<div class="print-out">
-    <div class="p-head">
+    <div class="p-header">
       <div class="name">${state.settings.company}</div>
-      <div class="serv">${serviceLines}</div>
+      <div class="serv">${serviceLines || "Garage Management System"}</div>
     </div>
-    <div class="p-title">JOB CARD / PERFORMA</div>
-    <div class="p-field">
-      <b>JC.NO:</b><span>${j.jc}</span><b>Date:</b><span>${j.date}</span>
-      <b>Customer:</b><span>${j.customer}</span><b>Phone:</b><span>${j.phone}</span>
-      <b>Plate:</b><span>${j.plate}</span><b>VIN:</b><span>${j.vin}</span>
-      <b>Service Type:</b><span>${serviceLines}</span><b>Odometer:</b><span>${j.odometer} Km</span>
-      <b>Mechanic:</b><span>${j.mechanic}</span><b>Status:</b><span>${j.status}</span>
+    <div class="p-body">
+      <div class="p-title">Job Card / Performa</div>
+      <div class="p-field">
+        <div><b>JC.NO</b><span>${j.jc}</span></div>
+        <div><b>Date</b><span>${j.date}</span></div>
+        <div><b>Customer</b><span>${j.customer}</span></div>
+        <div><b>Phone</b><span>${j.phone}</span></div>
+        <div><b>Plate</b><span>${j.plate}</span></div>
+        <div><b>VIN/Model</b><span>${j.vin}</span></div>
+        <div><b>Service Type</b><span>${serviceLines || "-"}</span></div>
+        <div><b>Odometer</b><span>${j.odometer || 0} Km</span></div>
+        <div><b>Mechanic</b><span>${j.mechanic}</span></div>
+        <div><b>Status</b><span>${j.status || "-"}</span></div>
+      </div>
+      <div class="p-parts-title">Parts Used</div>
+      <table class="p-table">
+        <thead><tr><th>Part Name</th><th>QTY</th><th>Unit Price</th><th>TOTAL</th><th>Source</th></tr></thead>
+        <tbody>${partRows}${partsTotalRow}</tbody>
+      </table>
+      <div style="margin-top:12px"><b>Mechanic's Report:</b> ${j.report || "No report added"}</div>
+      <div class="p-totals">
+        <div><span>Total Parts Cost</span><span>${money(r.totalParts)}</span></div>
+        <div><span>Labor Cost</span><span>${money(j.labor || 0)}</span></div>
+        <div><span>VAT ${Number(state.settings.vat) || 0}%</span><span>${money(r.vat)}</span></div>
+        <div><span>Extra ${Number(state.settings.extra) || 0}%</span><span>${money(r.extra)}</span></div>
+        <div class="p-grand"><span>GRAND TOTAL</span><span>${money(r.grand)}</span></div>
+      </div>
+      <div class="p-sign-area">
+        <div class="p-sign"><span></span><small>Prepared By</small></div>
+        <div class="p-sign"><span></span><small>Approved By</small></div>
+      </div>
+      <div class="p-note">I approve that ${state.settings.company} to carry out the above mentioned job description.</div>
     </div>
-    <div class="p-parts-title">Parts Used:</div>
-    <table class="p-table">
-      <thead><tr><th>Part Name</th><th>QTY</th><th>Unit Price</th><th>TOTAL</th><th>Source</th></tr></thead>
-      <tbody>${partRows}</tbody>
-    </table>
-    <div style="margin-top:8px"><b>Mechanic's Report:</b> ${j.report || ""}</div>
-    <div class="p-totals">
-      <div><span>Total Parts Cost:</span><span>${money(r.totalParts)}</span></div>
-      <div><span>Total Labor:</span><span>${money(j.labor)}</span></div>
-      <div><span>VAT ${state.settings.vat}%:</span><span>${money(r.vat)}</span></div>
-      <div><span>Extra ${state.settings.extra}%:</span><span>${money(r.extra)}</span></div>
-      <div class="p-grand"><span>GRAND TOTAL:</span><span>${money(r.grand)}</span></div>
-    </div>
-    <div class="p-field" style="margin-top:24px">
-      <b>Approved By:</b><span class="p-sign" style="display:inline-block"><span></span></span>
-    </div>
-    <div class="p-note">I approve that ${state.settings.company} to carry out above mentioned job description.</div>
   </div>`;
 }
 
@@ -596,14 +636,25 @@ $("btnPrint").addEventListener("click", () => {
   const jc = $("printJc").value;
   if (!jc) { alert("Select a JC.NO first."); return; }
   renderPrintCard();
-  const w = window.open("", "_blank");
+  const printContent = $("printCard").innerHTML;
+  if (!printContent) { alert("No data found for this JC.NO."); return; }
+  const w = window.open("", "_blank", "width=900,height=700");
   if (w) {
-    w.document.write(`<html><head><title>JobCard_${jc}</title><style>${printCss()}
-      table.p-table{border-collapse:collapse;width:100%}.p-table th,.p-table td{border:1px solid #1F2937;padding:4px 8px;text-align:left}
-      .p-table th{background:#1F2937;color:#fff}.num{text-align:right}
-    </style></head><body>${$("printCard").innerHTML}</body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><title>JobCard_${jc}</title>
+      <style>${printCss()}
+        @page{size:A4;margin:0}
+        .p-table{border-collapse:collapse;width:100%}
+        .p-table th,.p-table td{border:1px solid #d1d5db;padding:6px 10px;text-align:left}
+        .p-table th{background:#1F2937;color:#fff}
+        .num{text-align:right;font-variant-numeric:tabular-nums}
+        body{font-family:system-ui,sans-serif;margin:0;padding:0;background:#fff}
+      </style>
+    </head><body>${printContent}</body></html>`);
     w.document.close();
-    setTimeout(() => w.print(), 300);
+    w.focus();
+    setTimeout(() => { w.print(); w.close(); }, 400);
+  } else {
+    alert("Please allow popups for this site to print job cards.");
   }
 });
 

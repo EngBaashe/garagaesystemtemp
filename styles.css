@@ -405,6 +405,38 @@ textarea {
   border-radius: var(--radius-sm);
 }
 
+/* ========== SELECT WITH ADD BUTTON ========== */
+.select-with-add {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.select-with-add select {
+  flex: 1;
+  min-height: 44px;
+}
+
+.add-service-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 18px;
+  font-weight: 700;
+  min-height: 32px;
+  background: var(--color-secondary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.add-service-btn:hover {
+  background: var(--color-secondary-hover);
+  transform: none;
+  box-shadow: var(--shadow-sm);
+  filter: none;
+}
+
 /* ========== TAG INPUT ========== */
 .tag-input {
   display: flex;

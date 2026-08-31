@@ -143,53 +143,32 @@ $("btnSaveSettings").addEventListener("click", () => {
 });
 
 // --------------------- masters ---------------------
-function getSelectedServices() {
-  return Array.from($("serviceTagList").children).map((tag) => tag.dataset.value);
-}
-
-function renderServiceTags(selected) {
-  const list = $("serviceTagList");
-  list.innerHTML = "";
+function renderServiceSelect() {
   const services = Array.isArray(state.settings.services) ? state.settings.services : DEFAULT_SERVICES;
-  const selectedArray = Array.isArray(selected) ? selected : (selected ? [selected] : []);
-  selectedArray.forEach((s) => {
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.dataset.value = s;
-    tag.innerHTML = `${s} <button type="button" class="tag-remove" data-remove-service="${s}">×</button>`;
-    list.appendChild(tag);
-  });
+  $("fService").innerHTML = services
+    .map((s) => `<option>${s}</option>`)
+    .join("");
 }
 
-function addServiceTag(name) {
+$("btnAddService").addEventListener("click", () => {
+  const name = prompt("Enter new service name:");
+  if (!name || !name.trim()) return;
   const trimmed = name.trim();
-  if (!trimmed) return;
   const services = Array.isArray(state.settings.services) ? state.settings.services : DEFAULT_SERVICES;
   if (!services.includes(trimmed)) {
     services.push(trimmed);
     state.settings.services = services;
-  }
-  renderServiceTags(getSelectedServices());
-}
-
-$("fServiceInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    addServiceTag($("fServiceInput").value);
-    $("fServiceInput").value = "";
-  }
-});
-
-document.addEventListener("click", (e) => {
-  const removeService = e.target.dataset && e.target.dataset.removeService;
-  if (removeService != null) {
-    const current = getSelectedServices().filter((s) => s !== removeService);
-    renderServiceTags(current);
+    save();
+    renderServiceSelect();
+    renderSettings();
+    alert("Service added.");
+  } else {
+    alert("Service already exists.");
   }
 });
 
 function renderMaster() {
-  renderServiceTags([]);
+  renderServiceSelect();
   const body = $("masterBody");
   body.innerHTML = state.jobs.length
     ? state.jobs
@@ -221,7 +200,7 @@ function renderMaster() {
 $("btnAdd").addEventListener("click", () => {
   const jc = $("fJc").value.trim();
   if (!jc) { alert("JC.NO is required."); return; }
-  const service = getSelectedServices();
+  const service = Array.from($("fService").selectedOptions).map((o) => o.value);
   if (state.jobs.some((j) => j.jc === jc)) {
     let job = state.jobs.find((j) => j.jc === jc);
     Object.assign(job, {
@@ -255,7 +234,7 @@ $("btnAdd").addEventListener("click", () => {
   $("fJc").value = "";
   ["fCustomer","fPhone","fVin","fPlate","fMechanic","fLabor","fReport","fCompany","fOdometer","fApproval"]
     .forEach((id) => { $(id).value = ""; });
-  renderServiceTags([]);
+  Array.from($("fService").options).forEach((o) => { o.selected = false; });
   $("fStatus").value = "Diagnosis";
   $("fDate").value = today();
   $("fJc").focus();
@@ -284,7 +263,7 @@ document.addEventListener("click", (e) => {
     $("fMechanic").value = j.mechanic || "";
     $("fReport").value = j.report || "";
     $("fLabor").value = j.labor || "";
-    renderServiceTags(Array.isArray(j.service) ? j.service : (j.service ? [j.service] : []));
+    Array.from($("fService").options).forEach((o) => { o.selected = Array.isArray(j.service) && j.service.includes(o.value); });
     document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
       b.classList.toggle("active", b.dataset.sheet === "master");
       b.setAttribute("aria-selected", b.dataset.sheet === "master" ? "true" : "false");

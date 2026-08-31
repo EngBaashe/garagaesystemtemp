@@ -516,6 +516,16 @@ $("btnCloseShift").addEventListener("click", () => {
 });
 
 function printCloseHandover(c) {
+  const shiftCash = state.cash.filter((x) => x.shift === c.shift);
+  const cashRows = shiftCash.length
+    ? shiftCash.map((x) => `<tr>
+        <td>${x.date}</td>
+        <td>${x.type}</td>
+        <td>${x.employee}</td>
+        <td class="num">${money(x.amount)}</td>
+        <td>${x.description || ""}</td>
+      </tr>`).join("")
+    : `<tr><td colspan="5" style="text-align:center;color:#9ca3af;font-style:italic">No cash transactions for this shift</td></tr>`;
   const html = `<div class="print-out">
     <div class="p-header">
       <div class="name">${state.settings.company}</div>
@@ -527,15 +537,24 @@ function printCloseHandover(c) {
         <div><b>Shift</b><span>${c.shift}</span></div>
         <div><b>Employee</b><span>${c.employee}</span></div>
         <div><b>Opening Cash</b><span>${money(c.opening)}</span></div>
-        <div><b>Total Cash In</b><span>${money(c.totalIn)}</span></div>
-        <div><b>Total Cash Out</b><span>${money(c.totalOut)}</span></div>
-        <div><b>Remaining Balance</b><span>${money(c.balance)}</span></div>
         <div><b>Closed By</b><span>${c.closedBy}</span></div>
+      </div>
+      <div class="p-parts-title">Cash Transactions</div>
+      <table class="p-table">
+        <thead><tr><th>Date</th><th>Type</th><th>Employee</th><th>Amount</th><th>Description</th></tr></thead>
+        <tbody>${cashRows}</tbody>
+      </table>
+      <div class="p-totals">
+        <div><span>Total Cash In</span><span>${money(c.totalIn)}</span></div>
+        <div><span>Total Cash Out</span><span>${money(c.totalOut)}</span></div>
+        <div><span>Opening Cash</span><span>${money(c.opening)}</span></div>
+        <div class="p-grand"><span>Remaining Balance</span><span>${money(c.balance)}</span></div>
       </div>
       <div class="p-sign-area">
         <div class="p-sign"><span></span><small>Prepared By</small></div>
         <div class="p-sign"><span></span><small>Approved By</small></div>
       </div>
+      <div class="p-note">I confirm that the above shift cash transactions and balance are correct.</div>
     </div>
   </div>`;
   $("printCard").innerHTML = html;

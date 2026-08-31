@@ -156,26 +156,33 @@ function renderMaster() {
     ? state.jobs
         .map((j) => {
           const r = jobRow(j);
+          const serviceText = Array.isArray(j.service) ? j.service.join(", ") : (j.service || "");
           return `<tr>
             <td><b>${j.jc}</b></td><td>${j.date}</td><td>${j.customer}</td>
             <td>${j.company}</td><td>${j.phone}</td><td>${j.plate}</td>
-            <td>${j.vin}</td><td>${j.odometer}</td><td>${j.service}</td>
+            <td>${j.vin}</td><td>${j.odometer}</td><td>${serviceText}</td>
             <td><span class="status ${(j.status || "").replace(/\s/g, "")}">${j.status || ""}</span></td>
             <td>${j.approval}</td><td>${j.mechanic}</td>
+            <td>${j.report || ""}</td>
             <td class="num">${money(j.labor)}</td>
             <td class="num">${money(r.totalParts)}</td>
+            <td class="num">${money(state.settings.vat)}</td>
             <td class="num">${money(r.vat)}</td>
+            <td class="num">${money(state.settings.extra)}</td>
+            <td class="num">${money(r.extra)}</td>
             <td class="num grand">${money(r.grand)}</td>
+            <td><button class="btn small" data-edit-jc="${j.jc}">Edit</button></td>
             <td><button class="btn danger small" data-del-jc="${j.jc}">✕</button></td>
           </tr>`;
         })
         .join("")
-    : `<tr><td colspan="17" class="empty">No jobs yet. Fill the form above and click ADD NEW JOB.</td></tr>`;
+    : `<tr><td colspan="21" class="empty">No jobs yet. Fill the form above and click ADD NEW JOB.</td></tr>`;
 }
 
 $("btnAdd").addEventListener("click", () => {
   const jc = $("fJc").value.trim();
   if (!jc) { alert("JC.NO is required."); return; }
+  const service = Array.from($("fService").selectedOptions).map((o) => o.value);
   if (state.jobs.some((j) => j.jc === jc)) {
     let job = state.jobs.find((j) => j.jc === jc);
     Object.assign(job, {
@@ -186,21 +193,22 @@ $("btnAdd").addEventListener("click", () => {
       plate: $("fPlate").value || job.plate,
       vin: $("fVin").value || job.vin,
       odometer: $("fOdometer").value || job.odometer,
-      service: $("fService").value || job.service,
+      service: service.length ? service : job.service,
       status: $("fStatus").value,
       approval: $("fApproval").value || job.approval,
       mechanic: $("fMechanic").value || job.mechanic,
-      labor: $("fLabor").value || job.labor,
       report: $("fReport").value || job.report,
+      labor: $("fLabor").value || job.labor,
     });
   } else {
     state.jobs.unshift({
       jc, date: $("fDate").value || today(),
       customer: $("fCustomer").value, company: $("fCompany").value,
       phone: $("fPhone").value, plate: $("fPlate").value, vin: $("fVin").value,
-      odometer: $("fOdometer").value, service: $("fService").value,
+      odometer: $("fOdometer").value, service,
       status: $("fStatus").value, approval: $("fApproval").value,
-      mechanic: $("fMechanic").value, labor: $("fLabor").value, report: $("fReport").value,
+      mechanic: $("fMechanic").value, report: $("fReport").value,
+      labor: $("fLabor").value,
     });
   }
   save();
@@ -208,13 +216,109 @@ $("btnAdd").addEventListener("click", () => {
   $("fJc").value = "";
   ["fCustomer","fPhone","fVin","fPlate","fMechanic","fLabor","fReport","fCompany","fOdometer","fApproval"]
     .forEach((id) => { $(id).value = ""; });
-  $("fService").value = (state.settings.services && state.settings.services[0]) || "";
+  Array.from($("fService").options).forEach((o) => { o.selected = false; });
   $("fStatus").value = "Diagnosis";
   $("fDate").value = today();
   $("fJc").focus();
 });
 
+let editingPartIndex = null;
+let editingCashIndex = null;
+let editingCloseIndex = null;
+
 document.addEventListener("click", (e) => {
+  // Master edit
+  const editJc = e.target.dataset && e.target.dataset.editJc;
+  if (editJc) {
+    const j = state.jobs.find((x) => x.jc === editJc);
+    if (!j) return;
+    $("fJc").value = j.jc;
+    $("fDate").value = j.date || today();
+    $("fCustomer").value = j.customer || "";
+    $("fCompany").value = j.company || "";
+    $("fPhone").value = j.phone || "";
+    $("fPlate").value = j.plate || "";
+    $("fVin").value = j.vin || "";
+    $("fOdometer").value = j.odometer || "";
+    $("fStatus").value = j.status || "Diagnosis";
+    $("fApproval").value = j.approval || "";
+    $("fMechanic").value = j.mechanic || "";
+    $("fReport").value = j.report || "";
+    $("fLabor").value = j.labor || "";
+    Array.from($("fService").options).forEach((o) => { o.selected = Array.isArray(j.service) && j.service.includes(o.value); });
+    document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.sheet === "master");
+      b.setAttribute("aria-selected", b.dataset.sheet === "master" ? "true" : "false");
+    });
+    document.querySelectorAll(".sheet").forEach((s) => s.classList.remove("active"));
+    $("sheet-master").classList.add("active");
+    $("fJc").focus();
+    return;
+  }
+
+  // Parts edit
+  const editPart = e.target.dataset && e.target.dataset.editPart;
+  if (editPart != null) {
+    const p = state.parts[Number(editPart)];
+    if (!p) return;
+    editingPartIndex = Number(editPart);
+    $("partsJc").value = p.jc;
+    $("pName").value = p.name || "";
+    $("pQty").value = p.qty || 1;
+    $("pPrice").value = p.price || 0;
+    $("pSource").value = p.source || "Internal";
+    $("btnAddPart").textContent = "UPDATE PART";
+    document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.sheet === "parts");
+      b.setAttribute("aria-selected", b.dataset.sheet === "parts" ? "true" : "false");
+    });
+    document.querySelectorAll(".sheet").forEach((s) => s.classList.remove("active"));
+    $("sheet-parts").classList.add("active");
+    return;
+  }
+
+  // Cash edit
+  const editCash = e.target.dataset && e.target.dataset.editCash;
+  if (editCash != null) {
+    const c = state.cash[Number(editCash)];
+    if (!c) return;
+    editingCashIndex = Number(editCash);
+    $("cShift").value = c.shift || "Shift 1";
+    $("cEmployee").value = c.employee || "";
+    $("cType").value = c.type || "Cash In";
+    $("cAmount").value = c.amount || "";
+    $("cDesc").value = c.description || "";
+    $("cDate").value = c.date || today();
+    $("btnAddCash").textContent = "UPDATE";
+    document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.sheet === "cash");
+      b.setAttribute("aria-selected", b.dataset.sheet === "cash" ? "true" : "false");
+    });
+    document.querySelectorAll(".sheet").forEach((s) => s.classList.remove("active"));
+    $("sheet-cash").classList.add("active");
+    return;
+  }
+
+  // Close edit
+  const editClose = e.target.dataset && e.target.dataset.editClose;
+  if (editClose != null) {
+    const c = state.closes[Number(editClose)];
+    if (!c) return;
+    editingCloseIndex = Number(editClose);
+    $("closeShift").value = c.shift || "Shift 1";
+    $("closeEmployee").value = c.employee || "";
+    $("closeOpening").value = c.opening || 0;
+    $("btnCloseShift").textContent = "UPDATE CLOSE";
+    document.querySelectorAll(".tab[data-sheet]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.sheet === "close");
+      b.setAttribute("aria-selected", b.dataset.sheet === "close" ? "true" : "false");
+    });
+    document.querySelectorAll(".sheet").forEach((s) => s.classList.remove("active"));
+    $("sheet-close").classList.add("active");
+    return;
+  }
+
+  // Delete handlers
   const jc = e.target.dataset && e.target.dataset.delJc;
   if (jc) {
     if (!confirm(`Delete job ${jc} and its parts?`)) return;
@@ -222,14 +326,44 @@ document.addEventListener("click", (e) => {
     state.parts = state.parts.filter((p) => p.jc !== jc);
     save();
     renderAll();
+    return;
+  }
+
+  const idx = e.target.dataset && e.target.dataset.delPart;
+  if (idx != null) {
+    state.parts.splice(Number(idx), 1);
+    save();
+    renderParts();
+    renderMaster();
+    return;
+  }
+
+  const cashIdx = e.target.dataset && e.target.dataset.delCash;
+  if (cashIdx != null) {
+    state.cash.splice(Number(cashIdx), 1);
+    save();
+    renderCash();
+    return;
+  }
+
+  const closeIdx = e.target.dataset && e.target.dataset.delClose;
+  if (closeIdx != null) {
+    if (!confirm("Delete this shift close record?")) return;
+    state.closes.splice(Number(closeIdx), 1);
+    save();
+    renderClose();
+    return;
   }
 });
 
-// --------------------- parts ---------------------
 function fillJcSelects() {
+  const prevPartsJc = $("partsJc").value;
+  const prevPrintJc = $("printJc").value;
   const opts = state.jobs.map((j) => `<option value="${j.jc}">${j.jc} — ${j.customer || "no customer"}</option>`).join("");
   $("partsJc").innerHTML = opts || '<option value="">No jobs yet</option>';
   $("printJc").innerHTML = opts || '<option value="">No jobs yet</option>';
+  if (prevPartsJc && state.jobs.some((j) => j.jc === prevPartsJc)) $("partsJc").value = prevPartsJc;
+  if (prevPrintJc && state.jobs.some((j) => j.jc === prevPrintJc)) $("printJc").value = prevPrintJc;
 }
 function renderParts() {
   fillJcSelects();
@@ -238,8 +372,9 @@ function renderParts() {
   $("partsBody").innerHTML = rows.length
     ? rows.map((p, i) => `<tr>
         <td><b>${p.jc}</b></td><td>${p.name}</td><td class="num">${p.qty}</td>
-        <td class="num">${money(p.price)}</td><td>${p.source}</td><td class="num">${p.version}</td>
+        <td class="num">${money(p.price)}</td><td>${p.source}</td>
         <td class="num grand">${money(p.qty * p.price)}</td>
+        <td><button class="btn small" data-edit-part="${i}">Edit</button></td>
         <td><button class="btn danger small" data-del-part="${i}">✕</button></td>
       </tr>`).join("")
     : `<tr><td colspan="8" class="empty">No parts for JC ${jc || ""}. Add parts below.</td></tr>`;
@@ -249,13 +384,19 @@ $("btnAddPart").addEventListener("click", () => {
   const jc = $("partsJc").value;
   const name = $("pName").value.trim();
   if (!jc || !name) { alert("Select a JC.NO and enter a part name."); return; }
-  state.parts.push({
+  const partData = {
     jc, name,
     qty: Number($("pQty").value) || 1,
     price: Number($("pPrice").value) || 0,
     source: $("pSource").value,
-    version: Number($("pVersion").value) || 1,
-  });
+  };
+  if (editingPartIndex != null) {
+    state.parts[editingPartIndex] = partData;
+    editingPartIndex = null;
+    $("btnAddPart").textContent = "ADD PART";
+  } else {
+    state.parts.push(partData);
+  }
   $("pName").value = ""; $("pPrice").value = "";
   save();
   renderParts();
@@ -282,23 +423,31 @@ function renderCash() {
           <td>${c.date}</td><td>${c.shift}</td><td>${c.employee}</td>
           <td>${c.type}</td><td class="num ${c.type === "Cash In" ? "grand" : "grand"}">${money(c.amount)}</td>
           <td>${c.description}</td>
+          <td><button class="btn small" data-edit-cash="${i}">Edit</button></td>
           <td><button class="btn danger small" data-del-cash="${i}">✕</button></td>
         </tr>`)
         .reverse()
         .join("")
-    : `<tr><td colspan="7" class="empty">No cash transactions logged.</td></tr>`;
+    : `<tr><td colspan="8" class="empty">No cash transactions logged.</td></tr>`;
 }
 $("btnAddCash").addEventListener("click", () => {
   const amount = Number($("cAmount").value);
   if (!amount || !$("cEmployee").value.trim()) { alert("Amount and Employee are required."); return; }
-  state.cash.push({
+  const cashData = {
     date: $("cDate").value || today(),
     shift: $("cShift").value,
     employee: $("cEmployee").value.trim(),
     type: $("cType").value,
     amount,
     description: $("cDesc").value.trim(),
-  });
+  };
+  if (editingCashIndex != null) {
+    state.cash[editingCashIndex] = cashData;
+    editingCashIndex = null;
+    $("btnAddCash").textContent = "ADD";
+  } else {
+    state.cash.push(cashData);
+  }
   $("cEmployee").value = ""; $("cAmount").value = ""; $("cDesc").value = "";
   save();
   renderCash();
@@ -316,13 +465,15 @@ document.addEventListener("click", (e) => {
 function renderClose() {
   const body = $("closeBody");
   body.innerHTML = state.closes.length
-    ? state.closes.map((c) => `<tr>
+    ? state.closes.map((c, i) => `<tr>
         <td>${c.date}</td><td>${c.shift}</td><td>${c.employee}</td>
         <td class="num">${money(c.opening)}</td><td class="num">${money(c.totalIn)}</td>
         <td class="num">${money(c.totalOut)}</td><td class="num grand">${money(c.balance)}</td>
         <td>${c.closedBy}</td>
+        <td><button class="btn small" data-edit-close="${i}">Edit</button></td>
+        <td><button class="btn danger small" data-del-close="${i}">✕</button></td>
       </tr>`).join("")
-    : `<tr><td colspan="8" class="empty">No shift closings yet.</td></tr>`;
+    : `<tr><td colspan="10" class="empty">No shift closings yet.</td></tr>`;
 }
 $("btnCloseShift").addEventListener("click", () => {
   const shift = $("closeShift").value;
@@ -332,10 +483,14 @@ $("btnCloseShift").addEventListener("click", () => {
   const outAmt = state.cash.filter((c) => c.shift === shift && c.type === "Cash Out").reduce((s, c) => s + c.amount, 0);
   const opening = Number($("closeOpening").value) || 0;
   const balance = opening + inAmt - outAmt;
-  state.closes.unshift({ date: today(), shift, employee: emp, opening, totalIn: inAmt, totalOut: outAmt, balance, closedBy: emp });
-  save();
-  renderClose();
-  window.printCloseHandover(state.closes[0]);
+  if (editingCloseIndex != null) {
+    state.closes[editingCloseIndex] = { ...state.closes[editingCloseIndex], shift, employee: emp, opening, totalIn: inAmt, totalOut: outAmt, balance, closedBy: emp };
+    editingCloseIndex = null;
+    $("btnCloseShift").textContent = "CLOSE SHIFT";
+  } else {
+    state.closes.unshift({ date: today(), shift, employee: emp, opening, totalIn: inAmt, totalOut: outAmt, balance, closedBy: emp });
+    window.printCloseHandover(state.closes[0]);
+  }
 });
 
 function printCloseHandover(c) {
@@ -382,9 +537,9 @@ function renderPrintCard() {
   if (!j) { $("printCard").innerHTML = ""; return; }
   const parts = state.parts.filter((p) => p.jc === jc);
   const r = jobRow(j);
-  const serviceLines = Array.isArray(state.settings.services) ? state.settings.services.join(" • ") : "Diagnostic • Service • Major Repairs • Car Wash • Genuine Parts • Tires • A/C";
+  const serviceLines = Array.isArray(j.service) ? j.service.join(" • ") : (j.service || "");
   const partRows = parts.length
-    ? parts.map((p) => `<tr><td>${p.name}</td><td class="num">${p.qty}</td><td class="num">${money(p.price)}</td><td class="num">${money(p.qty * p.price)}</td><td>${p.source} (v${p.version})</td></tr>`).join("")
+    ? parts.map((p) => `<tr><td>${p.name}</td><td class="num">${p.qty}</td><td class="num">${money(p.price)}</td><td class="num">${money(p.qty * p.price)}</td><td>${p.source}</td></tr>`).join("")
     : `<tr><td colspan="5" style="text-align:center">No parts listed</td></tr>`;
   $("printCard").innerHTML = `<div class="print-out">
     <div class="p-head">
@@ -396,7 +551,7 @@ function renderPrintCard() {
       <b>JC.NO:</b><span>${j.jc}</span><b>Date:</b><span>${j.date}</span>
       <b>Customer:</b><span>${j.customer}</span><b>Phone:</b><span>${j.phone}</span>
       <b>Plate:</b><span>${j.plate}</span><b>VIN:</b><span>${j.vin}</span>
-      <b>Service Type:</b><span>${j.service}</span><b>Odometer:</b><span>${j.odometer} Km</span>
+      <b>Service Type:</b><span>${serviceLines}</span><b>Odometer:</b><span>${j.odometer} Km</span>
       <b>Mechanic:</b><span>${j.mechanic}</span><b>Status:</b><span>${j.status}</span>
     </div>
     <div class="p-parts-title">Parts Used:</div>

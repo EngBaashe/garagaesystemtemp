@@ -70,9 +70,9 @@
           <label>VIN/Model <input id="fVin" /></label>
           <label>Odometer (Km) <input id="fOdometer" type="number" /></label>
           <label class="span2">Assigned Mechanic <input id="fMechanic" /></label>
-          <label>Service Type <select id="fService"></select></label>
-          <label>Labor Cost <input id="fLabor" type="number" step="0.01" /></label>
+          <label>Service Type <select id="fService" multiple size="4"></select></label>
           <label class="span2">Mechanic's Report <input id="fReport" /></label>
+          <label>Labor Cost <input id="fLabor" type="number" step="0.01" /></label>
         </div>
         <div class="form-actions">
           <button class="btn primary" id="btnAdd">ADD NEW JOB</button>
@@ -82,12 +82,13 @@
       <div class="card table-card">
         <table id="masterTable">
           <thead>
-            <tr>
-              <th>JC.NO</th><th>Date</th><th>Customer</th><th>Company</th><th>Phone</th>
-              <th>Plate</th><th>VIN</th><th>Odometer</th><th>Service</th><th>Status</th>
-              <th>Approval</th><th>Mechanic</th><th>Labor</th><th>Total Parts</th>
-              <th>VAT 15%</th><th>Grand Total</th><th></th>
-            </tr>
+          <tr>
+            <th>JC.NO</th><th>Date</th><th>Customer</th><th>Company</th><th>Phone</th>
+            <th>Plate</th><th>VIN</th><th>Odometer</th><th>Service</th><th>Status</th>
+            <th>Approval</th><th>Mechanic</th><th>Report</th><th>Labor</th>
+            <th>Total Parts</th><th>VAT %</th><th>VAT</th><th>Extra %</th><th>Extra</th>
+            <th>Grand Total</th><th></th>
+          </tr>
           </thead>
           <tbody id="masterBody"></tbody>
         </table>
@@ -104,12 +105,11 @@
         <label>Source
           <select id="pSource"><option>Internal</option><option>External</option></select>
         </label>
-        <label>Version <input id="pVersion" type="number" value="1" min="1" /></label>
         <button class="btn primary" id="btnAddPart">ADD PART</button>
       </div>
       <div class="card table-card">
         <table id="partsTable">
-          <thead><tr><th>JC.NO</th><th>Part Name</th><th>QTY</th><th>Unit Price</th><th>Source</th><th>Version</th><th>TOTAL</th><th></th></tr></thead>
+          <thead><tr><th>JC.NO</th><th>Part Name</th><th>QTY</th><th>Unit Price</th><th>Source</th><th>TOTAL</th><th></th><th></th></tr></thead>
           <tbody id="partsBody"></tbody>
         </table>
       </div>
@@ -132,7 +132,7 @@
       </div>
       <div class="card table-card">
         <table id="cashTable">
-          <thead><tr><th>Date</th><th>Shift</th><th>Employee</th><th>Type</th><th>Amount</th><th>Description</th><th></th></tr></thead>
+          <thead><tr><th>Date</th><th>Shift</th><th>Employee</th><th>Type</th><th>Amount</th><th>Description</th><th></th><th></th></tr></thead>
           <tbody id="cashBody"></tbody>
         </table>
       </div>
@@ -150,7 +150,7 @@
       </div>
       <div class="card table-card">
         <table id="closeTable">
-          <thead><tr><th>Date</th><th>Shift</th><th>Employee</th><th>Opening</th><th>Total In</th><th>Total Out</th><th>Balance</th><th>Closed By</th></tr></thead>
+          <thead><tr><th>Date</th><th>Shift</th><th>Employee</th><th>Opening</th><th>Total In</th><th>Total Out</th><th>Balance</th><th>Closed By</th><th></th><th></th></tr></thead>
           <tbody id="closeBody"></tbody>
         </table>
       </div>

@@ -38,9 +38,26 @@ function load() {
     if (raw) {
       const d = JSON.parse(raw);
       Object.assign(state, d);
-      state.settings.services = state.settings.services || DEFAULT_SERVICES;
     }
   } catch (e) { console.error(e); }
+  normalizeState();
+}
+
+function normalizeState() {
+  if (!state.settings || typeof state.settings !== "object") {
+    state.settings = { company: "AUTO EXPERT & GENUINE PARTS", vat: 15, extra: 3, services: [...DEFAULT_SERVICES] };
+  } else {
+    state.settings.company = state.settings.company || "AUTO EXPERT & GENUINE PARTS";
+    state.settings.vat = Number(state.settings.vat) || 15;
+    state.settings.extra = Number(state.settings.extra) || 3;
+    if (!Array.isArray(state.settings.services) || state.settings.services.length === 0) {
+      state.settings.services = [...DEFAULT_SERVICES];
+    }
+  }
+  if (!Array.isArray(state.jobs)) state.jobs = [];
+  if (!Array.isArray(state.parts)) state.parts = [];
+  if (!Array.isArray(state.cash)) state.cash = [];
+  if (!Array.isArray(state.closes)) state.closes = [];
 }
 
 function saveAuth() { localStorage.setItem(AUTH_KEY, "1"); }
@@ -50,6 +67,18 @@ function isAuthenticated() { return localStorage.getItem(AUTH_KEY) === "1"; }
 const $ = (id) => document.getElementById(id);
 const money = (n) => (n == null || isNaN(n) ? "0.00" : Number(n).toFixed(2));
 const today = () => new Date().toISOString().slice(0, 10);
+
+function partsTotal(jc) {
+  return state.parts.filter((p) => p.jc === jc).reduce((s, p) => s + p.qty * p.price, 0);
+}
+function jobRow(j) {
+  const totalParts = partsTotal(j.jc);
+  const labor = Number(j.labor) || 0;
+  const vat = (labor + totalParts) * ((Number(state.settings.vat) || 0) / 100);
+  const extra = (labor + totalParts) * ((Number(state.settings.extra) || 0) / 100);
+  const grand = labor + totalParts + vat + extra;
+  return { totalParts, vat, extra, grand };
+}
 
 // --------------------- login/logout ---------------------
 function showLogin() {
@@ -98,10 +127,10 @@ document.querySelectorAll(".tab[data-sheet]").forEach((btn) => {
 
 // --------------------- settings ---------------------
 function renderSettings() {
-  $("sCompany").value = state.settings.company;
-  $("sVat").value = state.settings.vat;
-  $("sExtra").value = state.settings.extra;
-  $("sServices").value = state.settings.services.join("\n");
+  $("sCompany").value = state.settings.company || "";
+  $("sVat").value = state.settings.vat != null ? state.settings.vat : 15;
+  $("sExtra").value = state.settings.extra != null ? state.settings.extra : 3;
+  $("sServices").value = Array.isArray(state.settings.services) ? state.settings.services.join("\n") : DEFAULT_SERVICES.join("\n");
 }
 $("btnSaveSettings").addEventListener("click", () => {
   state.settings.company = $("sCompany").value.trim() || state.settings.company;
@@ -115,7 +144,8 @@ $("btnSaveSettings").addEventListener("click", () => {
 
 // --------------------- masters ---------------------
 function renderServiceSelect() {
-  $("fService").innerHTML = state.settings.services
+  const services = Array.isArray(state.settings.services) ? state.settings.services : DEFAULT_SERVICES;
+  $("fService").innerHTML = services
     .map((s) => `<option>${s}</option>`)
     .join("");
 }
@@ -230,6 +260,7 @@ $("btnAddPart").addEventListener("click", () => {
   save();
   renderParts();
   renderMaster();
+  renderPrintCard();
 });
 
 document.addEventListener("click", (e) => {
@@ -351,13 +382,14 @@ function renderPrintCard() {
   if (!j) { $("printCard").innerHTML = ""; return; }
   const parts = state.parts.filter((p) => p.jc === jc);
   const r = jobRow(j);
+  const serviceLines = Array.isArray(state.settings.services) ? state.settings.services.join(" • ") : "Diagnostic • Service • Major Repairs • Car Wash • Genuine Parts • Tires • A/C";
   const partRows = parts.length
     ? parts.map((p) => `<tr><td>${p.name}</td><td class="num">${p.qty}</td><td class="num">${money(p.price)}</td><td class="num">${money(p.qty * p.price)}</td><td>${p.source} (v${p.version})</td></tr>`).join("")
     : `<tr><td colspan="5" style="text-align:center">No parts listed</td></tr>`;
   $("printCard").innerHTML = `<div class="print-out">
     <div class="p-head">
       <div class="name">${state.settings.company}</div>
-      <div class="serv">Diagnostic • Service • Major Repairs • Car Wash • Genuine Parts • Tires • A/C</div>
+      <div class="serv">${serviceLines}</div>
     </div>
     <div class="p-title">JOB CARD / PERFORMA</div>
     <div class="p-field">
